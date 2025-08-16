@@ -20,7 +20,8 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import (
-    GRADEProject, Outcome, Study, GRADEAssessment
+    GRADEProject, Outcome, Study, GRADEAssessment,
+    SummaryOfFindingsTable, PlainLanguageStatement, AIAnalysisSession
 )
 from .forms import GRADEProjectForm, OutcomeForm, StudyForm
 from .utils.manuscript_processor import ManuscriptProcessor
@@ -149,6 +150,9 @@ def project_detail(request, project_id):
     # Get SoF table if exists
     sof_table = getattr(project, 'sof_table', None)
     
+    # Get recent AI sessions
+    recent_sessions = project.ai_sessions.order_by('-created_at')[:5]
+    
     context = {
         'project': project,
         'critical_outcomes': critical_outcomes,
@@ -156,6 +160,7 @@ def project_detail(request, project_id):
         'other_outcomes': other_outcomes,
         'studies': studies,
         'sof_table': sof_table,
+        'recent_sessions': recent_sessions,
         'has_outcomes': project.outcomes.exists(),
         'has_assessments': GRADEAssessment.objects.filter(outcome__project=project).exists(),
     }
