@@ -171,13 +171,20 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 
+# CSRF settings for Railway
+CSRF_TRUSTED_ORIGINS = [
+    "https://autograde.up.railway.app",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
 # =============================================================================
-# AI-POWERED GRADE ASSESSMENT - CLAUDE SONNET 3.5 CONFIGURATION
+# AI-POWERED GRADE ASSESSMENT - CLAUDE SONNET 4 CONFIGURATION
 # =============================================================================
 
-# Claude Sonnet 3.5 for AI-assisted GRADE methodology
+# Claude Sonnet 4 for AI-assisted GRADE methodology
 ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
-CLAUDE_MODEL = os.getenv('CLAUDE_MODEL', 'claude-3-5-sonnet-20241022')  # Latest Claude Sonnet 3.5
+CLAUDE_MODEL = os.getenv('CLAUDE_MODEL', 'claude-sonnet-4-20250514')  # Latest Claude Sonnet 4
 
 # AI Feature Toggles
 AI_GRADE_ENABLED = bool(os.getenv('ANTHROPIC_API_KEY', ''))  # Enable AI features if API key is provided
