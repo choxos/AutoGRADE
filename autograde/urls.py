@@ -17,12 +17,22 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+
+@csrf_exempt
+@require_http_methods(["GET", "HEAD"])
+def health_check(request):
+    """Simple health check endpoint for Railway"""
+    return HttpResponse("OK", content_type="text/plain")
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("health/", health_check, name='health_check'),  # Simple health check for Railway
     path("", include("grade.urls")),
     
     # Authentication URLs
