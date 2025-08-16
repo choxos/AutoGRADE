@@ -60,6 +60,14 @@ AutoGRADE is a state-of-the-art platform designed to streamline the GRADE (Gradi
 - **Publication Bias Detection**: Funnel plot analysis with statistical tests
 - **Automated Calculations**: OIS, absolute effects, and confidence interval analysis
 
+### 🤖 AI-Powered GRADE Assessment (Claude Sonnet 4)
+- **🎯 AI Risk of Bias Analysis**: Automated RoB assessment from study manuscripts
+- **📑 AI PICO Extraction**: Intelligent extraction of population, intervention, comparator, outcomes
+- **✨ AI Summary Generation**: Automated Summary of Findings table creation
+- **🧠 AI Recommendation Assistance**: Evidence-to-decision framework guidance
+- **📊 Intelligent Data Processing**: Claude Sonnet 4 for nuanced evidence interpretation
+- **🔍 Smart Document Analysis**: PDF/DOCX manuscript processing with AI insights
+
 ---
 
 ## 🧬 Core GRADE Implementation
@@ -146,13 +154,40 @@ AutoGRADE implements all seven Core GRADE articles from the BMJ 2025 series:
    # Edit .env with your configuration
    ```
 
-5. **Database Setup**
+5. **🤖 Enable AI-Powered GRADE (Claude Sonnet 4)**
+   ```bash
+   # Get your API key from https://console.anthropic.com/
+   # Add to your .env file:
+   ANTHROPIC_API_KEY=sk-ant-api03-your-actual-api-key-here
+   
+   # Optional: Configure AI features (all enabled by default)
+   AI_RISK_OF_BIAS_ANALYSIS=True
+   AI_PICO_EXTRACTION=True
+   AI_SUMMARY_GENERATION=True
+   AI_RECOMMENDATION_ASSISTANCE=True
+   ```
+
+6. **Database Setup**
    ```bash
    python manage.py migrate
    python manage.py collectstatic
    ```
 
 6. **Create Superuser**
+   
+   **Option A: Default Development Superuser (Quick Setup)**
+   ```bash
+   python manage.py setup_default_superuser
+   ```
+   
+   **Default Credentials:**
+   - Username: `choxos`
+   - Email: `ahmad.pub@gmail.com`
+   - Password: `!*)@&)`
+   
+   ⚠️ **Security Warning**: These are default development credentials. Change them immediately in production!
+   
+   **Option B: Custom Superuser (Recommended for Production)**
    ```bash
    python manage.py createsuperuser
    ```

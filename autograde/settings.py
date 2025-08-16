@@ -171,8 +171,24 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 
-# Claude API Configuration
+# =============================================================================
+# AI-POWERED GRADE ASSESSMENT - CLAUDE SONNET 3.5 CONFIGURATION
+# =============================================================================
+
+# Claude Sonnet 3.5 for AI-assisted GRADE methodology
 ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
+CLAUDE_MODEL = os.getenv('CLAUDE_MODEL', 'claude-3-5-sonnet-20241022')  # Latest Claude Sonnet 3.5
+
+# AI Feature Toggles
+AI_GRADE_ENABLED = bool(os.getenv('ANTHROPIC_API_KEY', ''))  # Enable AI features if API key is provided
+AI_RISK_OF_BIAS_ANALYSIS = os.getenv('AI_RISK_OF_BIAS_ANALYSIS', 'True').lower() == 'true'
+AI_PICO_EXTRACTION = os.getenv('AI_PICO_EXTRACTION', 'True').lower() == 'true'
+AI_SUMMARY_GENERATION = os.getenv('AI_SUMMARY_GENERATION', 'True').lower() == 'true'
+AI_RECOMMENDATION_ASSISTANCE = os.getenv('AI_RECOMMENDATION_ASSISTANCE', 'True').lower() == 'true'
+
+# Claude API Settings
+CLAUDE_MAX_TOKENS = int(os.getenv('CLAUDE_MAX_TOKENS', '4000'))
+CLAUDE_TEMPERATURE = float(os.getenv('CLAUDE_TEMPERATURE', '0.1'))  # Low temperature for consistent, factual responses
 
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50 MB
