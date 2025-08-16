@@ -164,6 +164,30 @@ AutoGRADE implements all seven Core GRADE articles from the BMJ 2025 series:
 
 Visit `http://127.0.0.1:8000` to access the application.
 
+### Railway Deployment
+
+1. **Deploy to Railway**
+   [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/django)
+
+2. **Add PostgreSQL Database**
+   ```bash
+   # Railway automatically provides DATABASE_URL
+   # No manual database configuration needed
+   ```
+
+3. **Set Environment Variables**
+   ```bash
+   SECRET_KEY=your-production-secret-key
+   DEBUG=False
+   ALLOWED_HOSTS=your-railway-domain.railway.app
+   ```
+
+4. **Railway automatically handles**:
+   - Port configuration (uses $PORT)
+   - PostgreSQL DATABASE_URL
+   - Static file serving with WhiteNoise
+   - Automatic migrations and collectstatic
+
 ---
 
 ## 🏃‍♂️ Quick Start
