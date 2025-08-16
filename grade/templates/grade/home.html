@@ -1,43 +1,316 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoGRADE - Automated GRADE Assessment</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>AutoGRADE - Automated GRADE Assessment for Evidence Synthesis</title>
+    <meta name="description" content="Professional AI-powered GRADE assessment platform for systematic reviews and meta-analyses. Generate Summary of Findings tables following Core GRADE methodology.">
+    <meta name="keywords" content="GRADE, systematic review, meta-analysis, evidence synthesis, summary of findings, medical research">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
     <style>
+        :root {
+            /* Light theme variables */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-muted: #868e96;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --hero-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
+            --accent-color: #3b82f6;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-muted: #9ca3af;
+            --border-color: #4b5563;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --hero-gradient: linear-gradient(135deg, #0f172a 0%, #1e40af 50%, #0891b2 100%);
+            --accent-color: #60a5fa;
+            --success-color: #34d399;
+            --warning-color: #fbbf24;
+            --error-color: #f87171;
+        }
+
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .serif {
+            font-family: 'Crimson Text', Georgia, serif;
+        }
+
+        /* Bootstrap overrides for dark mode */
+        [data-theme="dark"] .navbar-dark {
+            background-color: var(--bg-secondary) !important;
+        }
+
+        [data-theme="dark"] .card {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .bg-light {
+            background-color: var(--bg-secondary) !important;
+        }
+
+        [data-theme="dark"] .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        [data-theme="dark"] .border {
+            border-color: var(--border-color) !important;
+        }
+
+        /* Custom styles */
         .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--hero-gradient);
             color: white;
-            padding: 100px 0;
+            padding: 120px 0 80px;
+            position: relative;
+            overflow: hidden;
         }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23ffffff08" points="0,0 1000,300 1000,1000 0,700"/></svg>');
+            background-size: cover;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .academic-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 0.25rem;
+            backdrop-filter: blur(10px);
+        }
+
         .feature-card {
-            transition: transform 0.3s;
+            transition: all 0.3s ease;
             height: 100%;
+            border: none;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            border-radius: 12px;
+            overflow: hidden;
         }
+
         .feature-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px var(--shadow-color);
         }
+
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.5rem;
+        }
+
         .grade-badge {
             display: inline-block;
-            padding: 0.25em 0.6em;
-            font-size: 0.75em;
-            font-weight: 700;
-            border-radius: 0.25rem;
+            padding: 0.4em 1em;
+            font-size: 0.8em;
+            font-weight: 600;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .grade-high { background-color: #28a745; color: white; }
-        .grade-moderate { background-color: #ffc107; color: #212529; }
-        .grade-low { background-color: #fd7e14; color: white; }
-        .grade-very-low { background-color: #dc3545; color: white; }
+        
+        .grade-high { background-color: var(--success-color); color: white; }
+        .grade-moderate { background-color: var(--warning-color); color: #1f2937; }
+        .grade-low { background-color: #f97316; color: white; }
+        .grade-very-low { background-color: var(--error-color); color: white; }
+
+        .methodology-section {
+            background-color: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 3rem;
+            margin: 3rem 0;
+        }
+
+        .stats-card {
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stats-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .citation-box {
+            background-color: var(--bg-secondary);
+            border-left: 4px solid var(--accent-color);
+            padding: 1.5rem;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            margin: 2rem 0;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-light:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px var(--shadow-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .methodology-section {
+                padding: 2rem 1.5rem;
+            }
+            
+            .theme-toggle {
+                bottom: 1rem;
+                right: 1rem;
+                width: 48px;
+                height: 48px;
+            }
+        }
+
+        .navbar {
+            background-color: var(--bg-secondary) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+
+        .nav-link {
+            color: var(--text-primary) !important;
+            font-weight: 500;
+        }
+
+        .footer {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border-top: 1px solid var(--border-color);
+        }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="{% url 'grade:home' %}">
-                <i class="fas fa-clipboard-check"></i> AutoGRADE
+                <i class="fas fa-graduation-cap me-2"></i>AutoGRADE
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -47,28 +320,28 @@
                     {% if user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'grade:dashboard' %}">
-                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'grade:project_list' %}">
-                                <i class="fas fa-folder"></i> Projects
+                                <i class="fas fa-folder-open me-1"></i>Projects
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'logout' %}">
-                                <i class="fas fa-sign-out-alt"></i> Logout
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
                             </a>
                         </li>
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'login' %}">
-                                <i class="fas fa-sign-in-alt"></i> Login
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'admin:index' %}">
-                                <i class="fas fa-cog"></i> Admin
+                                <i class="fas fa-user-shield me-1"></i>Admin
                             </a>
                         </li>
                     {% endif %}
@@ -79,33 +352,40 @@
 
     <!-- Hero Section -->
     <div class="hero-section">
-        <div class="container">
+        <div class="container hero-content">
             <div class="row">
-                <div class="col-lg-8 mx-auto text-center">
-                    <h1 class="display-4 fw-bold mb-4">
-                        <i class="fas fa-robot"></i> AutoGRADE
+                <div class="col-lg-10 mx-auto text-center">
+                    <div class="academic-badge mb-3">Evidence-Based Research Platform</div>
+                    <h1 class="hero-title serif">
+                        AutoGRADE
                     </h1>
-                    <p class="lead mb-4">
-                        Automated GRADE Assessment and Summary of Findings Table Generation
+                    <p class="hero-subtitle">
+                        AI-Powered GRADE Assessment for Evidence Synthesis
                     </p>
-                    <p class="mb-5">
-                        Upload your systematic review or meta-analysis manuscript and let AI perform 
-                        comprehensive GRADE assessments following Core GRADE methodology. Generate 
-                        professional Summary of Findings tables with just a few clicks.
-                    </p>
+                    <div class="hero-description">
+                        <p class="mb-4">
+                            A comprehensive platform for automated GRADE (Grading of Recommendations Assessment, Development and Evaluation) methodology implementation. Designed for researchers, systematic reviewers, and evidence synthesis professionals who require rigorous, reproducible assessments of evidence certainty.
+                        </p>
+                        <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                            <span class="academic-badge">Systematic Reviews</span>
+                            <span class="academic-badge">Meta-Analyses</span>
+                            <span class="academic-badge">Evidence Synthesis</span>
+                            <span class="academic-badge">Clinical Guidelines</span>
+                        </div>
+                    </div>
                     {% if user.is_authenticated %}
-                        <a href="{% url 'grade:project_create' %}" class="btn btn-light btn-lg me-3">
-                            <i class="fas fa-plus"></i> Create New Project
+                        <a href="{% url 'grade:project_create' %}" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-microscope me-2"></i>Start New Assessment
                         </a>
                         <a href="{% url 'grade:dashboard' %}" class="btn btn-outline-light btn-lg">
-                            <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                            <i class="fas fa-chart-line me-2"></i>View Dashboard
                         </a>
                     {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-light btn-lg me-3">
-                            <i class="fas fa-sign-in-alt"></i> Get Started
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-user-graduate me-2"></i>Access Platform
                         </a>
                         <a href="{% url 'admin:index' %}" class="btn btn-outline-light btn-lg">
-                            <i class="fas fa-cog"></i> Admin Access
+                            <i class="fas fa-shield-alt me-2"></i>Admin Portal
                         </a>
                     {% endif %}
                 </div>
@@ -246,69 +526,184 @@
     </div>
     {% endif %}
 
-    <!-- GRADE Methodology Overview -->
-    <div class="container my-5">
+    <!-- Academic Research Section -->
+    <div class="methodology-section container">
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <div class="text-center mb-5">
-                    <h3>GRADE Methodology</h3>
-                    <p class="text-muted">
-                        Our assessments follow the Core GRADE approach for rating certainty of evidence
+                    <h3 class="serif mb-3">GRADE Methodology Implementation</h3>
+                    <p class="lead text-muted mb-4">
+                        Our platform implements the complete Core GRADE framework for systematic assessment of evidence certainty in clinical and health policy research.
                     </p>
                 </div>
                 
-                <div class="row g-3 mb-4">
-                    <div class="col-6 col-md-3 text-center">
-                        <span class="grade-badge grade-high">HIGH</span>
-                        <p class="small mt-2">Very confident in effect estimate</p>
+                <!-- GRADE Domains -->
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-shield-alt text-danger me-2"></i>Risk of Bias</h5>
+                        <p class="small">Assessment of methodological limitations in individual studies and overall body of evidence.</p>
                     </div>
-                    <div class="col-6 col-md-3 text-center">
-                        <span class="grade-badge grade-moderate">MODERATE</span>
-                        <p class="small mt-2">Moderately confident in effect</p>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-balance-scale text-warning me-2"></i>Inconsistency</h5>
+                        <p class="small">Evaluation of heterogeneity and variability in results across studies.</p>
                     </div>
-                    <div class="col-6 col-md-3 text-center">
-                        <span class="grade-badge grade-low">LOW</span>
-                        <p class="small mt-2">Limited confidence in effect</p>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-crosshairs text-info me-2"></i>Indirectness</h5>
+                        <p class="small">Analysis of population, intervention, comparator, and outcome directness.</p>
                     </div>
-                    <div class="col-6 col-md-3 text-center">
-                        <span class="grade-badge grade-very-low">VERY LOW</span>
-                        <p class="small mt-2">Very limited confidence</p>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-chart-bar text-primary me-2"></i>Imprecision</h5>
+                        <p class="small">Assessment of confidence intervals and optimal information size criteria.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-search text-secondary me-2"></i>Publication Bias</h5>
+                        <p class="small">Detection of selective reporting and small-study effects through statistical tests.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-arrow-up text-success me-2"></i>Rating Up</h5>
+                        <p class="small">Considerations for large effects, dose-response gradients, and residual confounding.</p>
                     </div>
                 </div>
+
+                <!-- GRADE Certainty Levels -->
+                <div class="text-center mb-4">
+                    <h4 class="serif mb-4">Evidence Certainty Classifications</h4>
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3">
+                            <span class="grade-badge grade-high d-block mb-2">HIGH</span>
+                            <p class="small">Very confident in the effect estimate</p>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <span class="grade-badge grade-moderate d-block mb-2">MODERATE</span>
+                            <p class="small">Moderately confident in the effect estimate</p>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <span class="grade-badge grade-low d-block mb-2">LOW</span>
+                            <p class="small">Limited confidence in the effect estimate</p>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <span class="grade-badge grade-very-low d-block mb-2">VERY LOW</span>
+                            <p class="small">Very limited confidence in the effect estimate</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Citation Box -->
+                <div class="citation-box">
+                    <p class="mb-3 serif">
+                        "The GRADE approach provides a systematic and transparent framework for rating the certainty of evidence and strength of recommendations in clinical practice guidelines."
+                    </p>
+                    <footer class="small">
+                        — Guyatt, G.H., et al. <em>Journal of Clinical Epidemiology</em> (2011)
+                    </footer>
+                </div>
                 
-                <p class="text-center">
-                    <small class="text-muted">
-                        Based on Core GRADE methodology by the GRADE Working Group. 
-                        <a href="https://www.gradeworkinggroup.org/" target="_blank">Learn more</a>
-                    </small>
-                </p>
+                <div class="text-center">
+                    <p class="small text-muted">
+                        <strong>Reference:</strong> Implementation follows Core GRADE methodology standards.
+                        <a href="https://www.gradeworkinggroup.org/" target="_blank" class="ms-2">
+                            <i class="fas fa-external-link-alt"></i> GRADE Working Group
+                        </a>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="bg-dark text-light py-4 mt-5">
+    <footer class="footer py-4 mt-5">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5><i class="fas fa-clipboard-check"></i> AutoGRADE</h5>
+                    <h5><i class="fas fa-graduation-cap me-2"></i>AutoGRADE</h5>
                     <p class="small">
-                        Automated GRADE assessment and Summary of Findings table generation 
-                        using AI-powered analysis of systematic reviews and meta-analyses.
+                        Professional platform for automated GRADE assessment and Summary of Findings table generation 
+                        using AI-powered analysis following Core GRADE methodology standards.
                     </p>
+                    <div class="small text-muted">
+                        <i class="fas fa-university me-1"></i> Academic Research Platform
+                        <span class="mx-2">•</span>
+                        <i class="fas fa-certificate me-1"></i> Evidence-Based
+                    </div>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p class="small mb-0">
-                        Powered by Claude Sonnet &copy; {% now "Y" %}
+                    <p class="small mb-2">
+                        <strong>Powered by:</strong> Claude Sonnet AI
                     </p>
-                    <p class="small">
-                        Following Core GRADE methodology standards
+                    <p class="small mb-2">
+                        <strong>Methodology:</strong> Core GRADE Framework
+                    </p>
+                    <p class="small mb-0">
+                        &copy; {% now "Y" %} AutoGRADE Platform
                     </p>
                 </div>
             </div>
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Dark Mode Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode">
+        <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Dark mode toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const htmlElement = document.documentElement;
+        
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        htmlElement.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            htmlElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+            
+            // Add a small animation effect
+            themeToggle.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                themeToggle.style.transform = 'scale(1)';
+            }, 100);
+        });
+        
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.className = 'fas fa-sun';
+                themeToggle.title = 'Switch to light mode';
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                themeToggle.title = 'Switch to dark mode';
+            }
+        }
+        
+        // Add smooth transitions when theme changes
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add transition class after initial load to prevent flash
+            setTimeout(() => {
+                document.body.classList.add('theme-transitions');
+            }, 100);
+        });
+        
+        // Optional: Listen for system theme changes
+        if (window.matchMedia) {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            mediaQuery.addListener((e) => {
+                if (!localStorage.getItem('theme')) {
+                    const systemTheme = e.matches ? 'dark' : 'light';
+                    htmlElement.setAttribute('data-theme', systemTheme);
+                    updateThemeIcon(systemTheme);
+                }
+            });
+        }
+    </script>
 </body>
 </html>
