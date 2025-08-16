@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.title }} - AutoGRADE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .grade-badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 0.75em;
+            font-weight: 700;
+            border-radius: 0.25rem;
+        }
+        .grade-high { background-color: #28a745; color: white; }
+        .grade-moderate { background-color: #ffc107; color: #212529; }
+        .grade-low { background-color: #fd7e14; color: white; }
+        .grade-very-low { background-color: #dc3545; color: white; }
+        
+        .outcome-card {
+            border-left: 4px solid #dee2e6;
+            transition: all 0.2s;
+        }
+        .outcome-card.critical { border-left-color: #dc3545; }
+        .outcome-card.important { border-left-color: #ffc107; }
+        .outcome-card.limited { border-left-color: #6c757d; }
+        
+        .outcome-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .pico-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 0.5rem;
+        }
+        
+        .action-button {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'grade:home' %}">
+                <i class="fas fa-clipboard-check"></i> AutoGRADE
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'grade:dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'grade:project_list' %}">
+                            <i class="fas fa-folder"></i> All Projects
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'grade:project_create' %}">
+                            <i class="fas fa-plus"></i> New Project
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fas fa-cog"></i> Admin</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Project Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'grade:dashboard' %}">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'grade:project_list' %}">Projects</a></li>
+                                <li class="breadcrumb-item active">{{ project.title|truncatewords:5 }}</li>
+                            </ol>
+                        </nav>
+                        <h1 class="h3 mb-2">{{ project.title }}</h1>
+                        {% if project.description %}
+                        <p class="text-muted">{{ project.description }}</p>
+                        {% endif %}
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> Created {{ project.created_at|date:"F d, Y" }}
+                                <span class="ms-3"><i class="fas fa-clock"></i> Updated {{ project.updated_at|date:"M d, Y g:i A" }}</span>
+                                {% if project.protocol_url %}
+                                <span class="ms-3">
+                                    <a href="{{ project.protocol_url }}" target="_blank" class="text-decoration-none">
+                                        <i class="fas fa-external-link-alt"></i> Protocol
+                                    </a>
+                                </span>
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column align-items-end">
+                        {% if has_outcomes %}
+                        <div class="btn-group action-button" role="group">
+                            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-play"></i> Run Assessments
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'grade:run_assessments' project.id %}">All Outcomes</a></li>
+                                <li><a class="dropdown-item" href="{% url 'grade:run_assessments' project.id %}?critical_only=1">Critical Only</a></li>
+                            </ul>
+                        </div>
+                        {% endif %}
+                        <div class="btn-group action-button" role="group">
+                            <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-magic"></i> AI Tools
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'grade:extract_pico' project.id %}">Extract PICO</a></li>
+                                {% if has_assessments %}
+                                <li><a class="dropdown-item" href="{% url 'grade:generate_sof' project.id %}">Generate SoF Table</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-bullseye fa-2x text-primary mb-2"></i>
+                        <h4 class="mb-1">{{ project.outcomes.count }}</h4>
+                        <small class="text-muted">Outcomes</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-medical fa-2x text-success mb-2"></i>
+                        <h4 class="mb-1">{{ studies.count }}</h4>
+                        <small class="text-muted">Studies</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clipboard-check fa-2x text-warning mb-2"></i>
+                        <h4 class="mb-1">{{ project.get_assessment_count }}</h4>
+                        <small class="text-muted">Assessments</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-table fa-2x text-info mb-2"></i>
+                        <h4 class="mb-1">{% if sof_table %}1{% else %}0{% endif %}</h4>
+                        <small class="text-muted">SoF Tables</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- PICO Information -->
+            <div class="col-lg-4">
+                <div class="card pico-section mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bullseye"></i> PICO Elements
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if project.population or project.intervention or project.comparison %}
+                        <div class="mb-3">
+                            <strong class="text-primary"><i class="fas fa-users"></i> Population:</strong>
+                            <p class="mb-2 ms-3">{{ project.population|default:"Not specified" }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong class="text-success"><i class="fas fa-syringe"></i> Intervention:</strong>
+                            <p class="mb-2 ms-3">{{ project.intervention|default:"Not specified" }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong class="text-warning"><i class="fas fa-balance-scale"></i> Comparison:</strong>
+                            <p class="mb-2 ms-3">{{ project.comparison|default:"Not specified" }}</p>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-info-circle fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">PICO elements not yet defined</p>
+                            <a href="{% url 'grade:extract_pico' project.id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-magic"></i> Extract with AI
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Recent AI Sessions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-robot"></i> Recent AI Activity
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_sessions %}
+                            {% for session in recent_sessions %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                                <div>
+                                    <small class="fw-bold">{{ session.session_type|title }}</small>
+                                    <br>
+                                    <small class="text-muted">{{ session.created_at|date:"M d, g:i A" }}</small>
+                                </div>
+                                <div>
+                                    {% if session.error_occurred %}
+                                    <i class="fas fa-exclamation-triangle text-danger"></i>
+                                    {% else %}
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <small class="text-muted">No AI activity yet</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outcomes -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list"></i> Outcomes
+                        </h5>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <input type="radio" class="btn-check" name="outcomeFilter" id="showAll" autocomplete="off" checked>
+                            <label class="btn btn-outline-primary" for="showAll">All</label>
+
+                            <input type="radio" class="btn-check" name="outcomeFilter" id="showCritical" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="showCritical">Critical</label>
+
+                            <input type="radio" class="btn-check" name="outcomeFilter" id="showImportant" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="showImportant">Important</label>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if critical_outcomes or important_outcomes or other_outcomes %}
+                        
+                        <!-- Critical Outcomes -->
+                        {% if critical_outcomes %}
+                        <div class="outcome-group critical-group">
+                            <h6 class="text-danger mb-3">
+                                <i class="fas fa-exclamation-circle"></i> Critical Outcomes (7-9)
+                            </h6>
+                            {% for outcome in critical_outcomes %}
+                            <div class="card outcome-card critical mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <a href="{% url 'grade:outcome_detail' outcome.id %}" class="text-decoration-none">
+                                                    {{ outcome.name }}
+                                                </a>
+                                            </h6>
+                                            {% if outcome.description %}
+                                            <p class="text-muted small mb-2">{{ outcome.description|truncatewords:20 }}</p>
+                                            {% endif %}
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-danger me-2">{{ outcome.importance }}/9</span>
+                                                <small class="text-muted">{{ outcome.get_outcome_type_display }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            {% if outcome.grade_assessment %}
+                                            <span class="grade-badge grade-{{ outcome.grade_assessment.final_certainty }}">
+                                                {{ outcome.grade_assessment.final_certainty|upper }}
+                                            </span>
+                                            <br>
+                                            <small class="text-muted">{{ outcome.grade_assessment.assessed_at|date:"M d" }}</small>
+                                            {% else %}
+                                            <span class="badge bg-light text-dark">Not assessed</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Important Outcomes -->
+                        {% if important_outcomes %}
+                        <div class="outcome-group important-group">
+                            <h6 class="text-warning mb-3">
+                                <i class="fas fa-star"></i> Important Outcomes (4-6)
+                            </h6>
+                            {% for outcome in important_outcomes %}
+                            <div class="card outcome-card important mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <a href="{% url 'grade:outcome_detail' outcome.id %}" class="text-decoration-none">
+                                                    {{ outcome.name }}
+                                                </a>
+                                            </h6>
+                                            {% if outcome.description %}
+                                            <p class="text-muted small mb-2">{{ outcome.description|truncatewords:20 }}</p>
+                                            {% endif %}
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-warning me-2">{{ outcome.importance }}/9</span>
+                                                <small class="text-muted">{{ outcome.get_outcome_type_display }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            {% if outcome.grade_assessment %}
+                                            <span class="grade-badge grade-{{ outcome.grade_assessment.final_certainty }}">
+                                                {{ outcome.grade_assessment.final_certainty|upper }}
+                                            </span>
+                                            <br>
+                                            <small class="text-muted">{{ outcome.grade_assessment.assessed_at|date:"M d" }}</small>
+                                            {% else %}
+                                            <span class="badge bg-light text-dark">Not assessed</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Other Outcomes -->
+                        {% if other_outcomes %}
+                        <div class="outcome-group other-group">
+                            <h6 class="text-secondary mb-3">
+                                <i class="fas fa-circle"></i> Limited Importance (1-3)
+                            </h6>
+                            {% for outcome in other_outcomes %}
+                            <div class="card outcome-card limited mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <a href="{% url 'grade:outcome_detail' outcome.id %}" class="text-decoration-none">
+                                                    {{ outcome.name }}
+                                                </a>
+                                            </h6>
+                                            {% if outcome.description %}
+                                            <p class="text-muted small mb-2">{{ outcome.description|truncatewords:20 }}</p>
+                                            {% endif %}
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-secondary me-2">{{ outcome.importance }}/9</span>
+                                                <small class="text-muted">{{ outcome.get_outcome_type_display }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            {% if outcome.grade_assessment %}
+                                            <span class="grade-badge grade-{{ outcome.grade_assessment.final_certainty }}">
+                                                {{ outcome.grade_assessment.final_certainty|upper }}
+                                            </span>
+                                            <br>
+                                            <small class="text-muted">{{ outcome.grade_assessment.assessed_at|date:"M d" }}</small>
+                                            {% else %}
+                                            <span class="badge bg-light text-dark">Not assessed</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% else %}
+                        <!-- No Outcomes -->
+                        <div class="text-center py-5">
+                            <i class="fas fa-bullseye fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No outcomes defined</h5>
+                            <p class="text-muted mb-4">
+                                Outcomes are the specific results or endpoints you want to assess using GRADE methodology.
+                            </p>
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="{% url 'grade:extract_pico' project.id %}" class="btn btn-primary">
+                                    <i class="fas fa-magic"></i> Extract with AI
+                                </a>
+                                <a href="{% url 'grade:outcome_create' project.id %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-plus"></i> Add Manually
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary of Findings Table -->
+        {% if sof_table %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-table"></i> Summary of Findings
+                        </h5>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'grade:view_sof' project.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <a href="{% url 'grade:export_sof' project.id %}" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-download"></i> Export
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2"><strong>{{ sof_table.title }}</strong></p>
+                        <small class="text-muted">
+                            Generated {{ sof_table.generated_at|date:"F d, Y g:i A" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Outcome filtering
+        document.addEventListener('DOMContentLoaded', function() {
+            const showAllBtn = document.getElementById('showAll');
+            const showCriticalBtn = document.getElementById('showCritical');
+            const showImportantBtn = document.getElementById('showImportant');
+            
+            const criticalGroup = document.querySelector('.critical-group');
+            const importantGroup = document.querySelector('.important-group');
+            const otherGroup = document.querySelector('.other-group');
+
+            function filterOutcomes() {
+                if (showCriticalBtn.checked) {
+                    if (criticalGroup) criticalGroup.style.display = 'block';
+                    if (importantGroup) importantGroup.style.display = 'none';
+                    if (otherGroup) otherGroup.style.display = 'none';
+                } else if (showImportantBtn.checked) {
+                    if (criticalGroup) criticalGroup.style.display = 'none';
+                    if (importantGroup) importantGroup.style.display = 'block';
+                    if (otherGroup) otherGroup.style.display = 'none';
+                } else {
+                    if (criticalGroup) criticalGroup.style.display = 'block';
+                    if (importantGroup) importantGroup.style.display = 'block';
+                    if (otherGroup) otherGroup.style.display = 'block';
+                }
+            }
+
+            [showAllBtn, showCriticalBtn, showImportantBtn].forEach(btn => {
+                if (btn) btn.addEventListener('change', filterOutcomes);
+            });
+        });
+    </script>
+</body>
+</html>

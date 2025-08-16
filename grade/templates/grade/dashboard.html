@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AutoGRADE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .grade-badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 0.75em;
+            font-weight: 700;
+            border-radius: 0.25rem;
+        }
+        .grade-high { background-color: #28a745; color: white; }
+        .grade-moderate { background-color: #ffc107; color: #212529; }
+        .grade-low { background-color: #fd7e14; color: white; }
+        .grade-very-low { background-color: #dc3545; color: white; }
+        .project-card {
+            transition: transform 0.2s;
+        }
+        .project-card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'grade:home' %}">
+                <i class="fas fa-clipboard-check"></i> AutoGRADE
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'grade:dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'grade:project_list' %}">
+                            <i class="fas fa-folder"></i> All Projects
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'grade:project_create' %}">
+                            <i class="fas fa-plus"></i> New Project
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fas fa-cog"></i> Admin</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-1">Dashboard</h1>
+                        <p class="text-muted">Welcome back, {{ user.get_full_name|default:user.username }}!</p>
+                    </div>
+                    <a href="{% url 'grade:project_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> New Project
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h5 class="card-title">{{ total_projects }}</h5>
+                                <p class="card-text">Total Projects</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-folder fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h5 class="card-title">{{ total_outcomes }}</h5>
+                                <p class="card-text">Total Outcomes</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-bullseye fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h5 class="card-title">{{ recent_assessments|length }}</h5>
+                                <p class="card-text">Recent Assessments</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-clipboard-check fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h5 class="card-title">0</h5>
+                                <p class="card-text">SoF Tables</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-table fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Recent Projects -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-folder-open"></i> Recent Projects</h5>
+                        <a href="{% url 'grade:project_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    <div class="card-body">
+                        {% if projects %}
+                            <div class="row">
+                                {% for project in projects %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card project-card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <a href="{% url 'grade:project_detail' project.id %}" class="text-decoration-none">
+                                                    {{ project.title }}
+                                                </a>
+                                            </h6>
+                                            <p class="card-text text-muted small">
+                                                {{ project.description|truncatewords:15|default:"No description" }}
+                                            </p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar"></i> {{ project.created_at|date:"M d, Y" }}
+                                                </small>
+                                                <span class="badge bg-light text-dark">
+                                                    {{ project.outcomes.count }} outcomes
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-folder-plus fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No projects yet</h5>
+                                <p class="text-muted">Create your first project to get started with GRADE assessments.</p>
+                                <a href="{% url 'grade:project_create' %}" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Create First Project
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Assessments -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-clipboard-check"></i> Recent Assessments</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_assessments %}
+                            {% for assessment in recent_assessments %}
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                                <div>
+                                    <h6 class="mb-1">{{ assessment.outcome.name|truncatewords:3 }}</h6>
+                                    <small class="text-muted">{{ assessment.outcome.project.title|truncatewords:3 }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="grade-badge grade-{{ assessment.final_certainty|lower }}">
+                                        {{ assessment.final_certainty|upper }}
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">{{ assessment.assessed_at|date:"M d" }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-3">
+                                <i class="fas fa-clipboard fa-2x text-muted mb-2"></i>
+                                <p class="text-muted small mb-0">No assessments yet</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'grade:project_create' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-plus"></i> New Project
+                            </a>
+                            <a href="{% url 'grade:project_list' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-list"></i> Browse Projects
+                            </a>
+                            <a href="{% url 'admin:index' %}" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-cog"></i> Admin Panel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
