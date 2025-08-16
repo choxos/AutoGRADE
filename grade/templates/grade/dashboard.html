@@ -1,154 +1,121 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - AutoGRADE</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .grade-badge {
-            display: inline-block;
-            padding: 0.25em 0.6em;
-            font-size: 0.75em;
-            font-weight: 700;
-            border-radius: 0.25rem;
-        }
-        .grade-high { background-color: #28a745; color: white; }
-        .grade-moderate { background-color: #ffc107; color: #212529; }
-        .grade-low { background-color: #fd7e14; color: white; }
-        .grade-very-low { background-color: #dc3545; color: white; }
-        .project-card {
-            transition: transform 0.2s;
-        }
-        .project-card:hover {
-            transform: translateY(-2px);
-        }
-    </style>
-</head>
-<body class="bg-light">
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'grade:home' %}">
-                <i class="fas fa-clipboard-check"></i> AutoGRADE
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'grade:dashboard' %}">
-                            <i class="fas fa-tachometer-alt"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'grade:project_list' %}">
-                            <i class="fas fa-folder"></i> All Projects
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'grade:project_create' %}">
-                            <i class="fas fa-plus"></i> New Project
-                        </a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user"></i> {{ user.username }}
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="fas fa-cog"></i> Admin</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+{% extends 'grade/base.html' %}
 
-    <!-- Main Content -->
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h1 class="h3 mb-1">Dashboard</h1>
-                        <p class="text-muted">Welcome back, {{ user.get_full_name|default:user.username }}!</p>
-                    </div>
-                    <a href="{% url 'grade:project_create' %}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> New Project
+{% block title %}Dashboard - AutoGRADE{% endblock %}
+
+{% block extra_css %}
+.project-card {
+    transition: all 0.3s ease;
+}
+.project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px var(--shadow-color);
+}
+
+.dashboard-stats .card {
+    border: none;
+    border-radius: 16px;
+    background: var(--hero-gradient);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.dashboard-stats .card:hover {
+    transform: translateY(-4px) scale(1.02);
+}
+
+.dashboard-header {
+    background: var(--hero-gradient);
+    color: white;
+    padding: 3rem 0 2rem;
+    margin-bottom: 3rem;
+    border-radius: 0 0 2rem 2rem;
+}
+
+.welcome-text {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.welcome-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+{% endblock %}
+
+{% block content %}
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="welcome-text serif">
+                        <i class="fas fa-tachometer-alt me-3"></i>Dashboard
+                    </h1>
+                    <p class="welcome-subtitle mb-0">
+                        Welcome back, {{ user.get_full_name|default:user.username }}! Ready to assess some evidence?
+                    </p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <a href="{% url 'grade:project_create' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-microscope me-2"></i>Start New Assessment
                     </a>
                 </div>
             </div>
         </div>
+    </div>
 
+    <!-- Main Content -->
+    <div class="container">
         <!-- Statistics Cards -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h5 class="card-title">{{ total_projects }}</h5>
-                                <p class="card-text">Total Projects</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="fas fa-folder fa-2x"></i>
-                            </div>
+        <div class="row mb-5 dashboard-stats">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center">
+                    <div class="card-body py-4">
+                        <div class="mb-3">
+                            <i class="fas fa-folder-open fa-3x"></i>
                         </div>
+                        <h3 class="mb-2">{{ total_projects }}</h3>
+                        <p class="mb-0 opacity-75">Total Projects</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h5 class="card-title">{{ total_outcomes }}</h5>
-                                <p class="card-text">Total Outcomes</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="fas fa-bullseye fa-2x"></i>
-                            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center">
+                    <div class="card-body py-4">
+                        <div class="mb-3">
+                            <i class="fas fa-bullseye fa-3x"></i>
                         </div>
+                        <h3 class="mb-2">{{ total_outcomes }}</h3>
+                        <p class="mb-0 opacity-75">Total Outcomes</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-warning text-dark">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h5 class="card-title">{{ recent_assessments|length }}</h5>
-                                <p class="card-text">Recent Assessments</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="fas fa-clipboard-check fa-2x"></i>
-                            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center">
+                    <div class="card-body py-4">
+                        <div class="mb-3">
+                            <i class="fas fa-clipboard-check fa-3x"></i>
                         </div>
+                        <h3 class="mb-2">{{ recent_assessments|length }}</h3>
+                        <p class="mb-0 opacity-75">Recent Assessments</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h5 class="card-title">0</h5>
-                                <p class="card-text">SoF Tables</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="fas fa-table fa-2x"></i>
-                            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card text-center">
+                    <div class="card-body py-4">
+                        <div class="mb-3">
+                            <i class="fas fa-table fa-3x"></i>
                         </div>
+                        <h3 class="mb-2">0</h3>
+                        <p class="mb-0 opacity-75">SoF Tables</p>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Recent Projects and Assessments -->
 
         <div class="row">
             <!-- Recent Projects -->
@@ -254,7 +221,4 @@
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}
