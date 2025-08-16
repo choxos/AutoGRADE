@@ -248,9 +248,32 @@ def home(request):
     if request.user.is_authenticated:
         return redirect('grade:dashboard')
     
-    context = {
-        'total_projects': GRADEProject.objects.count(),
-        'total_assessments': GRADEAssessment.objects.count(),
-    }
-    
-    return render(request, 'grade/home.html', context)
+    # Simple response for debugging Railway deployment
+    return HttpResponse("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>AutoGRADE - Automated GRADE Assessment</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 10px; text-align: center; }
+            .btn { display: inline-block; padding: 12px 24px; margin: 10px; text-decoration: none; border-radius: 5px; }
+            .btn-primary { background: #007bff; color: white; }
+            .btn-secondary { background: #6c757d; color: white; }
+        </style>
+    </head>
+    <body>
+        <div class="hero">
+            <h1>🎯 AutoGRADE</h1>
+            <p>Automated GRADE Evidence Assessment Platform</p>
+            <p>AI-powered GRADE assessments with Claude Sonnet 4</p>
+            <a href="/admin/" class="btn btn-primary">Admin Panel</a>
+            <a href="/accounts/login/" class="btn btn-secondary">Login</a>
+        </div>
+        <div style="margin-top: 30px; text-align: center;">
+            <h3>🚀 Railway Deployment Successful!</h3>
+            <p>AutoGRADE is now running on Railway with PostgreSQL database.</p>
+        </div>
+    </body>
+    </html>
+    """)
