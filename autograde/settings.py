@@ -83,12 +83,21 @@ WSGI_APPLICATION = "autograde.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# Railway automatically provides DATABASE_URL for PostgreSQL
-if os.getenv('DATABASE_URL'):
+# Database configuration - Railway uses DATABASE_URL, local uses DATABASE_PUBLIC_URL
+if os.getenv('DATABASE_URL'):  # Railway production
     import dj_database_url
     DATABASES = {
         'default': dj_database_url.config(
             default=os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+elif os.getenv('DATABASE_PUBLIC_URL'):  # Local development with Railway PostgreSQL
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_PUBLIC_URL'),
             conn_max_age=600,
             conn_health_checks=True,
         )
